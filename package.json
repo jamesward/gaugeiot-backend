@@ -1,0 +1,24 @@
+{
+  "name": "gaugeiot-backend",
+  "version": "1.0.0",
+  "description": "backend server for Gauge Iot application",
+  "main": "app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaugeiot/gaugeiot-backend.git"
+  },
+  "author": "joseigor",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gaugeiot/gaugeiot-backend/issues"
+  },
+  "homepage": "https://github.com/gaugeiot/gaugeiot-backend#readme",
+  "dependencies": {
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1"
+  }
+}

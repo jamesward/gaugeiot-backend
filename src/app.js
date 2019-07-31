@@ -1,5 +1,6 @@
-const express = require("express");
 require("dotenv").config();
+const express = require("express");
+const db = require("./database/db");
 
 const app = express();
 
@@ -8,6 +9,17 @@ app.get("/", (req, res) => res.send("Hello World!"));
 app.listen(process.env.PORT, () =>
   console.log(`Example app listening on port ${process.env.PORT}!`)
 );
+
+const writeDb = async () => {
+  //Obtain a document reference.
+  const document = db.doc("posts/intro-to-firestore-1");
+  // Enter new data into the document.
+  await document.set({
+    title: "Welcome to Firestore",
+    body: "Hello guy"
+  });
+  console.log("Entered new data into the document");
+};
 
 function listenForMessages(subscriptionName, timeout) {
   // [START pubsub_subscriber_async_pull]
@@ -51,3 +63,4 @@ function listenForMessages(subscriptionName, timeout) {
 }
 
 listenForMessages("test", 10);
+writeDb();

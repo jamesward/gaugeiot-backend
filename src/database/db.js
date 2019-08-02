@@ -1,6 +1,14 @@
-const { Firestore } = require("@google-cloud/firestore");
+const AWS = require('aws-sdk');
+AWS.config.update({
+  region: 'us-west-2',
+  endpoint: 'http://dynamodb.us-west-2.amazonaws.com',
+  accessKeyId: 'AKIAZFNYFEFV63QNJZYG',
+  secretAccessKey: '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'
+});
 
-// Create a new database connection
-const db = new Firestore({ keyFilename: process.env.GOOGLE_APPSPOT });
+// const { Firestore } = require("@google-cloud/firestore");
 
-module.exports = db;
+// // Create a new database connection
+// const db = new Firestore({ keyFilename: process.env.GOOGLE_APPSPOT });
+
+module.exports = AWS;

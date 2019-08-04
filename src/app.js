@@ -10,35 +10,35 @@ app.listen(process.env.PORT, () =>
   console.log(`Example app listening on port ${process.env.PORT}!`)
 );
 
-var docClient = new AWS.DynamoDB.DocumentClient();
+// var docClient = new AWS.DynamoDB.DocumentClient();
 
-var docClient = new AWS.DynamoDB.DocumentClient();
+// var docClient = new AWS.DynamoDB.DocumentClient();
 
-var table = 'users';
+// var table = 'users';
 
-var year = 2015;
-var title = 'The Big New Movie';
+// var year = 2015;
+// var title = 'The Big New Movie';
 
-var params = {
-  TableName: table,
-  Key: {
-    // year: year,
-    // title: title
-    email: 'joseigorcfm@gmail.com',
-    name: 'Jose Igor Clementino Ferreira Moreira'
-  }
-};
+// var params = {
+//   TableName: table,
+//   Key: {
+//     // year: year,
+//     // title: title
+//     email: 'joseigorcfm@gmail.com',
+//     name: 'Jose Igor Clementino Ferreira Moreira'
+//   }
+// };
 
-docClient.get(params, function(err, data) {
-  if (err) {
-    console.error(
-      'Unable to read item. Error JSON:',
-      JSON.stringify(err, null, 2)
-    );
-  } else {
-    console.log('GetItem succeeded:', JSON.stringify(data, null, 2));
-  }
-});
+// docClient.get(params, function(err, data) {
+//   if (err) {
+//     console.error(
+//       'Unable to read item. Error JSON:',
+//       JSON.stringify(err, null, 2)
+//     );
+//   } else {
+//     console.log('GetItem succeeded:', JSON.stringify(data, null, 2));
+//   }
+// });
 
 // var params = {
 //   TableName: 'Movies',

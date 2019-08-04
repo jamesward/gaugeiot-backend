@@ -63,3 +63,6 @@ typings/
 
 # exclude google cloud service accounts
 gcloud/
+
+# exckude jwt keys
+src/auth/*.key

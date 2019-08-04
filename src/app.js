@@ -1,10 +1,24 @@
 require('dotenv').config();
 const express = require('express');
 const AWS = require('./database/db');
+var jwt = require('./auth/jwt-module');
+const jwt2 = require('jsonwebtoken');
 
 const app = express();
 
 app.get('/', (req, res) => res.send('Hello World!'));
+app.post('/auth', (req, res) => {
+  let token = jwt.sign({ test: 'aaaaaa' });
+  console.log(token);
+  res.json({ token: token });
+});
+
+app.get('/protected', (req, res) => {
+  let token = jwt.filterToken(req.headers);
+  jwt.verify(token);
+  jwt.decode(token);
+  res.json(decoded);
+});
 
 app.listen(process.env.PORT, () =>
   console.log(`Example app listening on port ${process.env.PORT}!`)
@@ -148,3 +162,15 @@ app.listen(process.env.PORT, () =>
 
 // listenForMessages("test", 10);
 // writeDb();
+function getDifference(a, b) {
+  var i = 0;
+  var j = 0;
+  var result = '';
+
+  while (j < b.length) {
+    if (a[i] != b[j] || i == a.length) result += b[j];
+    else i++;
+    j++;
+  }
+  return result;
+}

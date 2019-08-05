@@ -5,20 +5,29 @@ var jwt = require('./auth/jwt-module');
 
 const app = express();
 
+app.get('/', (req, res) => {
+  console.log('test');
+  res.json({ message: 'Hello World!' });
+});
+
 app.post('/api/', (req, res) => {
   console.log('test');
   res.json({ message: 'Hello World!' });
 });
 
 app.post('/api/auth', (req, res) => {
+  //TODO: Get user email and password for the resquest
+  //TODO: Check if user is registered
+  //TODO: If user is registered send new token if user id and email in the data field
   let token = jwt.sign({ test: 'aaaaaa' });
-  console.log(token);
   res.json({ token: token });
 });
 
 app.get('/api/auth/verify', (req, res) => {
-  console.log(jwt.filterToken(req.headers));
-  res.json({ verified: 'true' });
+  const token = jwt.filterToken(req.headers);
+  const tokenVerified = jwt.verify(token);
+  if(tokenVerified) return res.json({ verified: 'true' });
+  else return res.json({ verified: 'false' });
 });
 
 app.get('/protected', (req, res) => {

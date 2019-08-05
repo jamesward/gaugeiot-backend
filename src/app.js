@@ -2,22 +2,29 @@ require('dotenv').config();
 const express = require('express');
 const AWS = require('./database/db');
 var jwt = require('./auth/jwt-module');
-const jwt2 = require('jsonwebtoken');
 
 const app = express();
 
-app.get('/', (req, res) => res.send('Hello World!'));
-app.post('/auth', (req, res) => {
+app.post('/api/', (req, res) => {
+  console.log('test');
+  res.json({ message: 'Hello World!' });
+});
+
+app.post('/api/auth', (req, res) => {
   let token = jwt.sign({ test: 'aaaaaa' });
   console.log(token);
   res.json({ token: token });
 });
 
+app.get('/api/auth/verify', (req, res) => {
+  console.log(jwt.filterToken(req.headers));
+  res.json({ verified: 'true' });
+});
+
 app.get('/protected', (req, res) => {
   let token = jwt.filterToken(req.headers);
   jwt.verify(token);
-  jwt.decode(token);
-  res.json(decoded);
+  res.json(token);
 });
 
 app.listen(process.env.PORT, () =>

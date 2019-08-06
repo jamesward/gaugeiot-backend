@@ -1,32 +1,39 @@
 require('dotenv').config();
 const express = require('express');
 const AWS = require('./database/db');
-var jwt = require('./auth/jwt-module');
+const jwt = require('./auth/jwt-module');
+const bodyParser = require('body-parser');
 
 const app = express();
 
-app.get('/', (req, res) => {
-  console.log('test');
-  res.json({ message: 'Hello World!' });
-});
+// parse application/json
+app.use(bodyParser.json());
 
-app.post('/api/', (req, res) => {
-  console.log('test');
-  res.json({ message: 'Hello World!' });
-});
-
+// Authenticates registered user by giving them a JWT
 app.post('/api/auth', (req, res) => {
-  //TODO: Get user email and password for the resquest
-  //TODO: Check if user is registered
-  //TODO: If user is registered send new token if user id and email in the data field
-  let token = jwt.sign({ test: 'aaaaaa' });
-  res.json({ token: token });
+  //TODO: Get user email and password from the resquest body
+  const userEmail = req.body.email;
+  const userPassword = req.body.password;
+  //TODO: Check if user is registered (remove fake authentication)
+  if (
+    userEmail === process.env.FAKE_USER_EMAIL &&
+    userPassword === process.env.FAKE_USER_PASSWORD
+  ) {
+    // If user is registered send new token if user id and email in the data field
+    let token = jwt.sign({
+      userId: process.env.FAKE_USER_ID, //TODO: remove this fake userID
+      email: userEmail
+    });
+    res.json({ msg: token });
+  } else {
+    res.json({ msg: 'user-not-registered' });
+  }
 });
 
 app.get('/api/auth/verify', (req, res) => {
   const token = jwt.filterToken(req.headers);
   const tokenVerified = jwt.verify(token);
-  if(tokenVerified) return res.json({ verified: 'true' });
+  if (tokenVerified) return res.json({ verified: 'true' });
   else return res.json({ verified: 'false' });
 });
 

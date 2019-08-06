@@ -20,7 +20,7 @@ module.exports = {
       issuer: 'Gauge Iot Server',
       subject: 'iam@user.me',
       audience: 'http://gaugeiot.com',
-      expiresIn: '30d', // 30 days validity
+      expiresIn: '1d', // 1 day validity
       algorithm: 'RS256' // RSASSA options[ "RS256", "RS384", "RS512" ]
     };
     return jwt.sign(payload, privateKEY, signOptions);
@@ -43,8 +43,7 @@ module.exports = {
       algorithm: ['RS256']
     };
     try {
-      if (jwt.verify(token, publicKEY, verifyOptions))
-      return true;
+      if (jwt.verify(token, publicKEY, verifyOptions)) return true;
     } catch (err) {
       return false;
     }

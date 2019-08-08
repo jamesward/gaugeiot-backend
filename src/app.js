@@ -1,25 +1,10 @@
 require('dotenv').config();
 const express = require('express');
-var graphqlHTTP = require('express-graphql');
-var { buildSchema } = require('graphql');
+const graphqlHTTP = require('express-graphql');
+const bodyParser = require('body-parser');
 const AWS = require('./database/db');
 const jwt = require('./auth/jwt-module');
-const bodyParser = require('body-parser');
-
-
-// Construct a schema, using GraphQL schema language
-var schema = buildSchema(`
-  type Query {
-    hello: String
-  }
-`);
-
-// The root provides a resolver function for each API endpoint
-var root = {
-  hello: () => {
-    return 'Hello world!';
-  },
-};
+const {schema, root} = require("./graphql/schema");
 
 
 const app = express();

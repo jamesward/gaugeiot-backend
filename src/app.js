@@ -1,8 +1,26 @@
 require('dotenv').config();
 const express = require('express');
+var graphqlHTTP = require('express-graphql');
+var { buildSchema } = require('graphql');
 const AWS = require('./database/db');
 const jwt = require('./auth/jwt-module');
 const bodyParser = require('body-parser');
+
+
+// Construct a schema, using GraphQL schema language
+var schema = buildSchema(`
+  type Query {
+    hello: String
+  }
+`);
+
+// The root provides a resolver function for each API endpoint
+var root = {
+  hello: () => {
+    return 'Hello world!';
+  },
+};
+
 
 const app = express();
 
@@ -37,11 +55,11 @@ app.get('/api/auth/verify', (req, res) => {
   else return res.json({ verified: 'false' });
 });
 
-app.get('/protected', (req, res) => {
-  let token = jwt.filterToken(req.headers);
-  jwt.verify(token);
-  res.json(token);
-});
+app.use('/graphql', graphqlHTTP({
+  schema: schema,
+  rootValue: root,
+  graphiql: true,
+}));
 
 app.listen(process.env.PORT, () =>
   console.log(`Example app listening on port ${process.env.PORT}!`)
@@ -185,15 +203,3 @@ app.listen(process.env.PORT, () =>
 
 // listenForMessages("test", 10);
 // writeDb();
-function getDifference(a, b) {
-  var i = 0;
-  var j = 0;
-  var result = '';
-
-  while (j < b.length) {
-    if (a[i] != b[j] || i == a.length) result += b[j];
-    else i++;
-    j++;
-  }
-  return result;
-}

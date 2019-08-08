@@ -18,12 +18,12 @@
   },
   "homepage": "https://github.com/gaugeiot/gaugeiot-backend#readme",
   "dependencies": {
-    "@google-cloud/firestore": "^2.2.4",
-    "@google-cloud/pubsub": "^0.30.1",
     "aws-sdk": "^2.503.0",
     "body-parser": "^1.19.0",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
+    "express-graphql": "^0.9.0",
+    "graphql": "^14.4.2",
     "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {

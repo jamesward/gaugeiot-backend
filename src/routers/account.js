@@ -30,6 +30,7 @@ router.post('/signup', function(req, res) {
   const docClient = new AWS.DynamoDB.DocumentClient();
   const TableName = 'users';
 
+  //DynamoDB parameters
   let params = {
     TableName,
     Key: {
@@ -44,20 +45,16 @@ router.post('/signup', function(req, res) {
     else if (data.Item !== undefined) {
       // user is registered and verified
       if (data.Item.isVerified)
-        res
-          .status(400)
-          .json({
-            code: responseCodes.emailRegVer,
-            msg: 'User is already registered and verified!'
-          });
+        res.status(400).json({
+          code: responseCodes.emailRegVer,
+          msg: 'User is already registered and verified!'
+        });
       else {
         // user is registered but his account was not verified
-        res
-          .status(500)
-          .json({
-            code: responseCodes.emailReg,
-            msg: 'User is registered but not verified!'
-          });
+        res.status(500).json({
+          code: responseCodes.emailReg,
+          msg: 'User is registered but not verified!'
+        });
       }
     } else {
       //user does not exist yet
@@ -73,16 +70,15 @@ router.post('/signup', function(req, res) {
           passwordResetToken: 'none'
         }
       };
+      //insert the new user into database
       docClient.put(params, function(err, data) {
         if (err) {
           res.status(500).json({ code: 500, msg: 'Internal server error!' });
         } else {
-          res
-            .status(200)
-            .json({
-              code: responseCodes.emailNew,
-              msg: 'User account created!'
-            });
+          res.status(200).json({
+            code: responseCodes.emailNew,
+            msg: 'User account created!'
+          });
           //TODO: Send a email to the user with an account verification token
         }
       });

@@ -82,7 +82,7 @@ router.post('/signup', function(req, res) {
         });
       }
     } else {
-      //user does not exist yet
+      // If we reach here, it means the user does not exist yet
       // Generate a token to be used in the verification of the user
       // account email
       let accountVerificationToken = jwt.sign({ email, name }, '1d');

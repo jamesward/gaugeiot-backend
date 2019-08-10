@@ -4,13 +4,16 @@ const graphqlHTTP = require('express-graphql');
 const bodyParser = require('body-parser');
 const AWS = require('./database/db');
 const jwt = require('./auth/jwt-module');
-const {schema, root} = require("./graphql/schema");
-
+const { schema, root } = require('./graphql/schema');
+var accountRouter = require('./routers/account');
 
 const app = express();
 
 // parse application/json
 app.use(bodyParser.json());
+
+//
+app.use('/account', accountRouter);
 
 // Authenticates registered user by giving them a JWT
 app.post('/api/auth', (req, res) => {
@@ -40,11 +43,14 @@ app.get('/api/auth/verify', (req, res) => {
   else return res.json({ verified: 'false' });
 });
 
-app.use('/graphql', graphqlHTTP({
-  schema: schema,
-  rootValue: root,
-  graphiql: true,
-}));
+app.use(
+  '/graphql',
+  graphqlHTTP({
+    schema: schema,
+    rootValue: root,
+    graphiql: true
+  })
+);
 
 app.listen(process.env.PORT, () =>
   console.log(`Example app listening on port ${process.env.PORT}!`)

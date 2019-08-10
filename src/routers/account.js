@@ -6,6 +6,34 @@ const jwt = require('../auth/jwt-module');
 
 //This file has the routers related to the user account management
 
+// Authenticates registered user by giving them a JWT
+router.post('/signin', (req, res) => {
+  //TODO: Get user email and password from the resquest body
+  const userEmail = req.body.email;
+  const userPassword = req.body.password;
+  //TODO: Check if user is registered (remove fake authentication)
+  if (
+    userEmail === process.env.FAKE_USER_EMAIL &&
+    userPassword === process.env.FAKE_USER_PASSWORD
+  ) {
+    // If user is registered send new token if user id and email in the data field
+    let token = jwt.sign({
+      userId: process.env.FAKE_USER_ID, //TODO: remove this fake userID
+      email: userEmail
+    });
+    res.json({ msg: token });
+  } else {
+    res.json({ msg: 'user-not-registered' });
+  }
+});
+
+router.get('/verify', (req, res) => {
+  const token = jwt.filterToken(req.headers);
+  const tokenVerified = jwt.verify(token);
+  if (tokenVerified) return res.json({ verified: 'true' });
+  else return res.json({ verified: 'false' });
+});
+
 // Create a new user account
 router.post('/signup', function(req, res) {
   const email = req.body.email;

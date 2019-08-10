@@ -13,7 +13,7 @@ const app = express();
 app.use(bodyParser.json());
 
 //
-app.use('/account', accountRouter);
+app.use('/api/auth', accountRouter);
 
 // Authenticates registered user by giving them a JWT
 app.post('/api/auth', (req, res) => {

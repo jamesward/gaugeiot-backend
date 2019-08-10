@@ -1,15 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const AWS = require('../database/db');
+const { sendVerificationEmail } = require('../email');
+const jwt = require('../auth/jwt-module');
 
 //This file has the routers related to the user account management
 
-// define the home page route
-router.get('/', function(req, res) {
-  res.send('Accounts Home Page');
-});
-
-// create a new user account
+// Create a new user account
 router.post('/signup', function(req, res) {
   const email = req.body.email;
   const password = req.body.password;
@@ -51,13 +48,17 @@ router.post('/signup', function(req, res) {
         });
       else {
         // user is registered but his account was not verified
-        res.status(500).json({
+        res.status(400).json({
           code: responseCodes.emailReg,
           msg: 'User is registered but not verified!'
         });
       }
     } else {
       //user does not exist yet
+      // Generate a token to be used in the verification of the user
+      // account email
+      let accountVerificationToken = jwt.sign({ email, name }, '1d');
+      let passwordResetToken = 'none';
       params = {
         TableName,
         Item: {
@@ -67,10 +68,11 @@ router.post('/signup', function(req, res) {
           lastName,
           password,
           isVerified: false,
-          passwordResetToken: 'none'
+          passwordResetToken,
+          accountVerificationToken
         }
       };
-      //insert the new user into database
+      // Insert the new user into database
       docClient.put(params, function(err, data) {
         if (err) {
           res.status(500).json({ code: 500, msg: 'Internal server error!' });
@@ -79,11 +81,100 @@ router.post('/signup', function(req, res) {
             code: responseCodes.emailNew,
             msg: 'User account created!'
           });
-          //TODO: Send a email to the user with an account verification token
+          // Send a email to the user with an account verification token
+          sendVerificationEmail(accountVerificationToken);
         }
       });
     }
   });
+});
+
+// Does the email account verification
+router.get('/verifyEmail', function(req, res) {
+  // Get token from the GET request
+  let token = req.query.token;
+
+  // Make sure token is still valid
+  let tokenVerified = jwt.verify(token);
+
+  // Checks if token is valid
+  if (!tokenVerified) {
+    // TODOD: If token is not valid anymore, we should send a html page
+    // inform an error occurred in the account validation and ask
+    // if we should provided a new valitation token by email.
+    res.status(400).json({ msg: 'Token is not valid anymore!' });
+  } else {
+    // If we reach here, it means we got a valid token :)
+
+    // Decode the token to be able to access its payload
+    let tokenDecoded = jwt.decode(token);
+
+    //Get user email and name from the token
+    let email = tokenDecoded.payload.email;
+    let name = tokenDecoded.payload.name;
+
+    // Check if this account axist in database
+    let TableName = 'users';
+    let params = {
+      TableName,
+      Key: {
+        email,
+        name
+      }
+    };
+
+    // Creates a DynamoDB database client
+    const docClient = new AWS.DynamoDB.DocumentClient();
+    docClient.get(params, (err, data) => {
+      if (err) {
+        // TODO: send a html page to indicates an Internal server error occured
+        res.status(500).json({ code: 500, msg: 'Internal server error!' });
+      } else if (data.Item === undefined) {
+        // If we reach here, it means the user account associated with the email
+        // provided in the token does not exist.
+        // TODO: Send a html page to inform the user with this email is not registered
+        // in our database
+        res.status(400).json({
+          code: 400,
+          msg: `A user with name ${name} and email ${email} does not have a registered account!`
+        });
+      } else if (data.Item.isVerified === true) {
+        // If we reach here, it means the user is already revified
+        // TODO: send a html page to the user to inform the user account was sucessfull
+        // veirfied, and give the option to the user to go to be login page.
+        res.status(200).send('Account alredy verified!');
+      } else {
+        // If we reach here, it means the user account associated with the email
+        // provided in the token exist in our database and the account isn't verified,
+        // so we can mark the account as verified in our database.
+
+        //Setup database parameters to set the user account as verified
+        params = {
+          TableName,
+          Key: {
+            email,
+            name
+          },
+          UpdateExpression: 'set isVerified = :v',
+          ExpressionAttributeValues: {
+            ':v': true
+          },
+          ReturnValues: 'UPDATED_NEW'
+        };
+        // Set the user account as verified in database
+        docClient.update(params, (err, data) => {
+          if (err) {
+            // TODO: send a html page to indicates an Internal server error occured
+            res.status(500).json({ code: 500, msg: 'Internal server error!' });
+          } else {
+            //TODO: send a html page to the user to informe the user account was sucessfull
+            // verified, and give the option to the user to go to be login page.
+            res.status(200).send('Email verified!');
+          }
+        });
+      }
+    });
+  }
 });
 
 module.exports = router;

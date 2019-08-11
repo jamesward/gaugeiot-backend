@@ -52,6 +52,7 @@ const accountVerificationEmailTemplate = (token, firstName) => {
               href="http://localhost:3000/api/auth/verifyEmail?token=${token}"
               >👉 Click here!
             </a>
+            <p>This verification email will be valid for <b>1 day</b>!</p>
           </div>
         </body>
       </html>`;

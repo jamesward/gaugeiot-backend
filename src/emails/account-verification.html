@@ -43,13 +43,14 @@
   </head>
   <body>
     <div class="container">
-      <h1>🎊 Hi ${firstName}, welcome to Gauge Iot !</h1>
+      <h1>Hi ${firstName}, welcome to Gauge Iot !</h1>
       <p>To verify your account, please click in the button below!</p>
       <a
         class="verify-button"
         href="http://localhost:3000/api/auth/verifyEmail?token=${token}"
         >👉 Click here!
       </a>
+      <p>This verification email will be valid for <b>1 day</b>!</p>
     </div>
   </body>
 </html>

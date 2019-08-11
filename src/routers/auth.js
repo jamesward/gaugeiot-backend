@@ -1,13 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const AWS = require('../database/db');
-const { sendVerificationEmail } = require('../email');
+const { sendVerificationEmail } = require('../emails/email');
 const jwt = require('../auth/jwt-module');
 
 //This file has the routers related to the user account management
 
+//TODO: REMOVE for production
+router.post('/sendEmail', (req, res) => {
+  sendVerificationEmail('hahaha');
+  res.status(200).send('Email Sent');
+});
+
 // Authenticates registered user by giving them a JWT
 router.post('/signin', (req, res) => {
+  //TODO: remove log
+  console.log('signin called');
+
   //TODO: Get user email and password from the resquest body
   const userEmail = req.body.email;
   const userPassword = req.body.password;
@@ -110,7 +119,7 @@ router.post('/signup', function(req, res) {
             msg: 'User account created!'
           });
           // Send a email to the user with an account verification token
-          sendVerificationEmail(accountVerificationToken);
+          sendVerificationEmail(accountVerificationToken, firstName, email);
         }
       });
     }

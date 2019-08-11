@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
+const { accountVerificationEmailTemplate } = require('./emails-template');
 
-const sendVerificationEmail = (token = '') => {
+const sendVerificationEmail = (token = '', firsName = '', email) => {
   // Generate SMTP service account from ethereal.email
   nodemailer.createTestAccount((err, account) => {
     if (err) {
@@ -23,12 +24,11 @@ const sendVerificationEmail = (token = '') => {
 
     // Message object
     let message = {
-      from: 'Sender Name <sender@example.com>',
-      to: 'Jose Igor <joseigorcfm@gmail.com>',
-      subject: 'Nodemailer is unicode friendly ✔',
+      from: 'Gauge Iot <gaugeiot@gaugeiot.com>',
+      to: `${firsName} ${email}`,
+      subject: 'Account Confirmation',
       text: 'Hello to myself!',
-      html: `<p><b>Hello</b>!</p>
-      <a href="http://localhost:3000/account/verifyEmail?token=${token}">Verification Token</a>`
+      html: accountVerificationEmailTemplate(token, firsName)
     };
 
     transporter.sendMail(message, (err, info) => {

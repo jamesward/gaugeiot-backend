@@ -5,8 +5,8 @@ const AWS = require('aws-sdk');
 AWS.config.update({
   region: 'us-west-2',
   endpoint: 'http://dynamodb.us-west-2.amazonaws.com',
-  accessKeyId: 'AKIAZFNYFEFV63QNJZYG',
-  secretAccessKey: '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'
+  accessKeyId: process.env.DYNAMODB_ACCESS_KEY_ID,
+  secretAccessKey: process.env.DYNAMODB_SECRET_ACCESS_KEY
 });
 
 // const { Firestore } = require("@google-cloud/firestore");

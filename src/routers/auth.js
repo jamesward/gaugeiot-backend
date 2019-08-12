@@ -68,6 +68,8 @@ router.post('/signin', (req, res) => {
   // try to find an account associated with the provided email in database
   docClient.query(params, function(err, data) {
     if(err) {
+      console.log(err);
+      
       res.status(500).json({ code: 500, msg: 'Internal server error!' });
       return;
     }

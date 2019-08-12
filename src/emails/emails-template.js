@@ -17,7 +17,6 @@ const accountVerificationEmailTemplate = (token, firstName) => {
             border-radius: 3px;
             background-color: #ffffff;
             text-align: center;
-            box-shadow: 0px 0px 12px 0px rgba(141, 150, 171, 1) !important;
           }
     
           .container h1 {
@@ -35,15 +34,18 @@ const accountVerificationEmailTemplate = (token, firstName) => {
             border: solid 1px transparent;
           }
     
+          .btn-container {
+            padding: 20px 0;
+          }
+    
           .verify-button:active,
           .verify-button:hover {
-            color: #353b48;
+            color: #353b48 !important;
             background-color: white !important;
             border: solid 1px #353b48;
-            -webkit-box-shadow: 0px 3px 31px -13px rgba(0, 0, 0, 0.75);
-            -moz-box-shadow: 0px 3px 31px -13px rgba(0, 0, 0, 0.75);
-            box-shadow: 0px 3px 31px -13px rgba(0, 0, 0, 0.75);
           }
+    
+          
     
           @media only screen and (max-width: 375px) {
             .container {

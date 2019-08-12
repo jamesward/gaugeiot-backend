@@ -16,12 +16,28 @@ router.post('/sendEmail', (req, res) => {
   res.status(200).send('Email Sent');
 });
 
+//TODO: REMOVE for production
+router.post('/checkPassword', (req, res) => {
+  sendVerificationEmail('Checking password!');
+  const plainTextPassword = req.body.password;
+  // Load hash from your password DB.
+  let hash = "$2b$10$1z3g3lh8bMwcH7uZbMPFY.C3phsDoAiZP67UwYLRsLtb6IncOUC.C";
+  let hash2 = "$2b$10$M7YvPaUjnEoLNzo4XpRqruXbmRP8ITbIwSktruvYUFjTqtE2nEnaW";
+  bcrypt.compare(plainTextPassword, hash2, function(err, response) {
+    if(err) res.status(500).json({ code: 500, msg: 'Internal server error!' });
+    if(response === true) res.status(200).send("Password OK");
+    else res.status(400).send("Password NOT OK");
+  });
+  
+});
+
+
 // Authenticates registered user by giving them a JWT
 router.post('/signin', (req, res) => {
   //TODO: remove log
   console.log('signin called');
 
-  //TODO: Get user email and password from the resquest body
+  // Get user email and password from the resquest body
   const userEmail = req.body.email;
   const userPassword = req.body.password;
   //TODO: Check if user is registered (remove fake authentication)

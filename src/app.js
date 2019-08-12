@@ -11,6 +11,8 @@ const app = express();
 
 // parse application/json
 app.use(bodyParser.json());
+// parse application/urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
 
 //
 app.use('/api/auth', authRouter);

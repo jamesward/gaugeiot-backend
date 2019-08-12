@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/gaugeiot/gaugeiot-backend#readme",
   "dependencies": {
+    "@sendgrid/mail": "^6.4.0",
     "aws-sdk": "^2.503.0",
     "body-parser": "^1.19.0",
     "dotenv": "^8.0.0",

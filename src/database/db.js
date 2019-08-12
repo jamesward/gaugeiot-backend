@@ -1,4 +1,7 @@
 const AWS = require('aws-sdk');
+
+// TODO: Put accessKeyId and secretAccessKey as enviroment varaibles !!!!!
+
 AWS.config.update({
   region: 'us-west-2',
   endpoint: 'http://dynamodb.us-west-2.amazonaws.com',

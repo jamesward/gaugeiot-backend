@@ -1,10 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 const AWS = require('../database/db');
 const { sendVerificationEmail } = require('../emails/email');
 const jwt = require('../auth/jwt-module');
 
 //This file has the routers related to the user account management
+
+// Salt used by bcrypt to hash user passwords
+const saltRounds = 10;
 
 //TODO: REMOVE for production
 router.post('/sendEmail', (req, res) => {
@@ -46,18 +50,20 @@ router.get('/verify', (req, res) => {
 // Create a new user account
 router.post('/signup', function(req, res) {
   const email = req.body.email;
-  const password = req.body.password;
+  const plainTextPassword = req.body.password;
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
   const name = `${firstName} ${lastName}`;
 
+  
+
   //check for valitations errors
-  if (!email || !password || !firstName || !lastName)
+  if (!email || !plainTextPassword || !firstName || !lastName)
     res.status(400).json({ msg: 'One or more fields is/are empty!' });
 
   const responseCodes = {
     emailReg: 0, // email already registere but not verified
-    emailRegVer: 1, //email registered and verified
+    emailRegVer: 1, // email registered and verified
     emailNew: 2 // new email, registered right now
   };
 
@@ -95,32 +101,52 @@ router.post('/signup', function(req, res) {
       // Generate a token to be used in the verification of the user
       // account email
       let accountVerificationToken = jwt.sign({ email, name }, '1d');
+
+      // Initially there is no token to reset password
       let passwordResetToken = 'none';
-      params = {
-        TableName,
-        Item: {
-          email,
-          name,
-          firstName,
-          lastName,
-          password,
-          isVerified: false,
-          passwordResetToken,
-          accountVerificationToken
-        }
-      };
-      // Insert the new user into database
-      docClient.put(params, function(err, data) {
-        if (err) {
+
+      // Generates a hashed password based in the plain text password provided 
+      // by the the user
+      bcrypt.genSalt(saltRounds, function(err, salt) {
+        if(err) {
           res.status(500).json({ code: 500, msg: 'Internal server error!' });
-        } else {
-          res.status(200).json({
-            code: responseCodes.emailNew,
-            msg: 'User account created!'
-          });
-          // Send a email to the user with an account verification token
-          sendVerificationEmail(accountVerificationToken, firstName, email);
         }
+        // Generates the hash password based in the plainTextPassword and the salt
+        bcrypt.hash(plainTextPassword, salt, function(err, hash) {
+          if(err) {
+            res.status(500).json({ code: 500, msg: 'Internal server error!' });
+          }
+           
+          const password = hash;
+          //DynamoDB parameters
+          params = {
+            TableName,
+            Item: {
+              email,
+              name,
+              firstName,
+              lastName,
+              password,
+              isVerified: false,
+              passwordResetToken,
+              accountVerificationToken
+            }
+          };
+
+          // Insert the new user into database
+          docClient.put(params, function(err, data) {
+            if (err) {
+              res.status(500).json({ code: 500, msg: 'Internal server error!' });
+            } else {
+              res.status(200).json({
+                code: responseCodes.emailNew,
+                msg: 'User account created!'
+              });
+              // Send a email to the user with an account verification token
+              sendVerificationEmail(accountVerificationToken, firstName, email);
+            }
+          });
+        });
       });
     }
   });

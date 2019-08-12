@@ -49,7 +49,7 @@ const sendVerificationEmail = (token = '', firsName = '', email) => {
   const msg = {
     from: 'gaugeiot@gaugeiot.com',
     to: `joseigorcfm@gmail.com`,
-    subject: 'Account Confirmation',
+    subject: 'Welcome to Gauge Iot! Confirm Your Email',
     text: 'Hello to myself!',
     html: accountVerificationEmailTemplate(token, firsName)
   };

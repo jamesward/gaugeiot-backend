@@ -10,7 +10,6 @@ const accountVerificationEmailTemplate = (token, firstName) => {
             margin: 0px;
           }
           .container {
-            display: divc;
             max-width: 700px;
             margin: auto;
             padding: 20px 0px;
@@ -18,9 +17,7 @@ const accountVerificationEmailTemplate = (token, firstName) => {
             border-radius: 3px;
             background-color: #ffffff;
             text-align: center;
-            -webkit-box-shadow: 0px 0px 12px 0px rgba(141, 150, 171, 1);
-            -moz-box-shadow: 0px 0px 12px 0px rgba(141, 150, 171, 1);
-            box-shadow: 0px 0px 12px 0px rgba(141, 150, 171, 1);
+            box-shadow: 0px 0px 12px 0px rgba(141, 150, 171, 1) !important;
           }
     
           .container h1 {
@@ -75,7 +72,7 @@ const accountVerificationEmailTemplate = (token, firstName) => {
             <a
               class="verify-button"
               href="http://localhost:3000/api/auth/verifyEmail?token=${token}"
-              >👉 Confirme Email Address
+              >👉 Confirm Email Address
             </a>
           </div>
 

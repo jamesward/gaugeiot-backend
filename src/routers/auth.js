@@ -36,24 +36,74 @@ router.post('/checkPassword', (req, res) => {
 router.post('/signin', (req, res) => {
   //TODO: remove log
   console.log('signin called');
-
+  
+  const responseCodes = {
+    wrongInputs: 0, // userMail or userPassword are empty or invalid
+    accountDoesNotExist: 1, // account does not exist in database
+    accountNotVerified: 2, // Account exist but email wasn't verified
+    passwordMismatch: 3, // password doesn't match the database password,
+    tokenProvided: 4, // user signin successfully and a token was provided
+  };
   // Get user email and password from the resquest body
-  const userEmail = req.body.email;
-  const userPassword = req.body.password;
-  //TODO: Check if user is registered (remove fake authentication)
-  if (
-    userEmail === process.env.FAKE_USER_EMAIL &&
-    userPassword === process.env.FAKE_USER_PASSWORD
-  ) {
-    // If user is registered send new token if user id and email in the data field
-    let token = jwt.sign({
-      userId: process.env.FAKE_USER_ID, //TODO: remove this fake userID
-      email: userEmail
-    });
-    res.json({ msg: token });
-  } else {
-    res.json({ msg: 'user-not-registered' });
+  const email = req.body.email;
+  const plainTextPassword = req.body.password;
+
+
+  //check for valitations errors
+  if (!email || !plainTextPassword){
+    res.status(400).json({ code: responseCodes.wrongInputs, msg: 'One or more fields is/are empty!' });
+    return;
   }
+  
+  //DynamoDB parameters
+  const TableName = 'users';
+  let params = {
+    TableName,
+    KeyConditionExpression   : "email = :email",
+    ExpressionAttributeValues: {
+      ":email": email
+    }
+  };
+  const docClient = new AWS.DynamoDB.DocumentClient();
+  // try to find an account associated with the provided email in database
+  docClient.query(params, function(err, data) {
+    if(err) {
+      res.status(500).json({ code: 500, msg: 'Internal server error!' });
+      return;
+    }
+    // Checks if account exist
+    if(data.Count === 0 ){
+      res.status(400).json({ code: responseCodes.accountDoesNotExist, msg: `Account doen't exist !` });
+      return;
+    }
+    // Check if email was verified. Only accounts with verified email can signin
+    if(data.Items[0].isVerified === false) {
+      res.status(400).json(
+        { code: responseCodes.accountNotVerified, 
+          msg: `Account exist but email wasn't verified !` }
+      );
+      return;
+    }
+    //check if the password provided match with the one stored in database
+    const storedPassword = data.Items[0].password;
+    bcrypt.compare(plainTextPassword,storedPassword, (err, response) => {
+      if(err){ 
+        res.status(500).json({ code: 500, msg: 'Internal server error!' });
+        return;
+      }
+      // if password doesn't match report error to the caller
+      if(!response) {
+        res.status(400).json(
+          { code: responseCodes.passwordMismatch, 
+            msg: `Password doesn't match the password stored in database !` }
+        );
+        return;
+      }
+      // if passwords matchs, a token should be provided to the user
+      const token = jwt.sign({email});
+      res.status(200).json({ code:responseCodes.tokenProvided, msg: token });
+    });
+  });
 });
 
 router.get('/verify', (req, res) => {

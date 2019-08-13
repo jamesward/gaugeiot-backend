@@ -63,7 +63,7 @@ sendgrid.env
 
 
 # exclude google cloud service accounts
-gcloud/
+aws/
 
 # exckude jwt keys
 src/auth/*.key

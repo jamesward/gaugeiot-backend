@@ -21,89 +21,100 @@ router.post('/checkPassword', (req, res) => {
   sendVerificationEmail('Checking password!');
   const plainTextPassword = req.body.password;
   // Load hash from your password DB.
-  let hash = "$2b$10$1z3g3lh8bMwcH7uZbMPFY.C3phsDoAiZP67UwYLRsLtb6IncOUC.C";
-  let hash2 = "$2b$10$M7YvPaUjnEoLNzo4XpRqruXbmRP8ITbIwSktruvYUFjTqtE2nEnaW";
+  let hash = '$2b$10$1z3g3lh8bMwcH7uZbMPFY.C3phsDoAiZP67UwYLRsLtb6IncOUC.C';
+  let hash2 = '$2b$10$M7YvPaUjnEoLNzo4XpRqruXbmRP8ITbIwSktruvYUFjTqtE2nEnaW';
   bcrypt.compare(plainTextPassword, hash2, function(err, response) {
-    if(err) res.status(500).json({ code: 500, msg: 'Internal server error!' });
-    if(response === true) res.status(200).send("Password OK");
-    else res.status(400).send("Password NOT OK");
+    if (err) res.status(500).json({ code: 500, msg: 'Internal server error!' });
+    if (response === true) res.status(200).send('Password OK');
+    else res.status(400).send('Password NOT OK');
   });
-  
 });
-
 
 // Authenticates registered user by giving them a JWT
 router.post('/signin', (req, res) => {
   //TODO: remove log
   console.log('signin called');
-  
+
   const responseCodes = {
     wrongInputs: 0, // userMail or userPassword are empty or invalid
     accountDoesNotExist: 1, // account does not exist in database
     accountNotVerified: 2, // Account exist but email wasn't verified
     passwordMismatch: 3, // password doesn't match the database password,
-    tokenProvided: 4, // user signin successfully and a token was provided
+    tokenProvided: 4 // user signin successfully and a token was provided
   };
   // Get user email and password from the resquest body
   const email = req.body.email;
   const plainTextPassword = req.body.password;
 
-
   //check for valitations errors
-  if (!email || !plainTextPassword){
-    res.status(400).json({ code: responseCodes.wrongInputs, msg: 'One or more fields is/are empty!' });
+  if (!email || !plainTextPassword) {
+    res
+      .status(400)
+      .json({
+        code: responseCodes.wrongInputs,
+        msg: 'One or more fields is/are empty!'
+      });
     return;
   }
-  
+
   //DynamoDB parameters
   const TableName = 'users';
   let params = {
     TableName,
-    KeyConditionExpression   : "email = :email",
+    KeyConditionExpression: 'email = :email',
     ExpressionAttributeValues: {
-      ":email": email
+      ':email': email
     }
   };
   const docClient = new AWS.DynamoDB.DocumentClient();
   // try to find an account associated with the provided email in database
   docClient.query(params, function(err, data) {
-    if(err) {
+    if (err) {
       console.log(err);
-      
+
       res.status(500).json({ code: 500, msg: 'Internal server error!' });
       return;
     }
     // Checks if account exist
-    if(data.Count === 0 ){
-      res.status(400).json({ code: responseCodes.accountDoesNotExist, msg: `Account doen't exist !` });
+    if (data.Count === 0) {
+      res
+        .status(400)
+        .json({
+          code: responseCodes.accountDoesNotExist,
+          msg: `Account doesn't exist !`
+        });
       return;
     }
     // Check if email was verified. Only accounts with verified email can signin
-    if(data.Items[0].isVerified === false) {
-      res.status(400).json(
-        { code: responseCodes.accountNotVerified, 
-          msg: `Account exist but email wasn't verified !` }
-      );
+    if (data.Items[0].isVerified === false) {
+      res
+        .status(400)
+        .json({
+          code: responseCodes.accountNotVerified,
+          msg: `Account exist but email wasn't verified !`
+        });
       return;
     }
     //check if the password provided match with the one stored in database
     const storedPassword = data.Items[0].password;
-    bcrypt.compare(plainTextPassword,storedPassword, (err, response) => {
-      if(err){ 
+    bcrypt.compare(plainTextPassword, storedPassword, (err, response) => {
+      if (err) {
         res.status(500).json({ code: 500, msg: 'Internal server error!' });
         return;
       }
       // if password doesn't match report error to the caller
-      if(!response) {
-        res.status(400).json(
-          { code: responseCodes.passwordMismatch, 
-            msg: `Password doesn't match the password stored in database !` }
-        );
+      if (!response) {
+        res
+          .status(400)
+          .json({
+            code: responseCodes.passwordMismatch,
+            msg: `Password doesn't match the password stored in database !`
+          });
         return;
       }
       // if passwords matchs, a token should be provided to the user
-      const token = jwt.sign({email});
-      res.status(200).json({ code:responseCodes.tokenProvided, msg: token });
+      const token = jwt.sign({ email });
+      res.status(200).json({ code: responseCodes.tokenProvided, msg: token });
     });
   });
 });
@@ -122,8 +133,6 @@ router.post('/signup', function(req, res) {
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
   const name = `${firstName} ${lastName}`;
-
-  
 
   //check for valitations errors
   if (!email || !plainTextPassword || !firstName || !lastName)
@@ -173,18 +182,18 @@ router.post('/signup', function(req, res) {
       // Initially there is no token to reset password
       let passwordResetToken = 'none';
 
-      // Generates a hashed password based in the plain text password provided 
+      // Generates a hashed password based in the plain text password provided
       // by the the user
       bcrypt.genSalt(saltRounds, function(err, salt) {
-        if(err) {
+        if (err) {
           res.status(500).json({ code: 500, msg: 'Internal server error!' });
         }
         // Generates the hash password based in the plainTextPassword and the salt
         bcrypt.hash(plainTextPassword, salt, function(err, hash) {
-          if(err) {
+          if (err) {
             res.status(500).json({ code: 500, msg: 'Internal server error!' });
           }
-           
+
           const password = hash;
           //DynamoDB parameters
           params = {
@@ -204,7 +213,9 @@ router.post('/signup', function(req, res) {
           // Insert the new user into database
           docClient.put(params, function(err, data) {
             if (err) {
-              res.status(500).json({ code: 500, msg: 'Internal server error!' });
+              res
+                .status(500)
+                .json({ code: 500, msg: 'Internal server error!' });
             } else {
               res.status(200).json({
                 code: responseCodes.emailNew,

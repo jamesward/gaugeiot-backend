@@ -136,10 +136,10 @@ router.post('/signup', function(req, res) {
 
   //check for valitations errors
   if (!email || !plainTextPassword || !firstName || !lastName)
-    res.status(400).json({ msg: 'One or more fields is/are empty!' });
+    res.status(200).json({ msg: 'One or more fields is/are empty!' });
 
   const responseCodes = {
-    emailReg: 0, // email already registere but not verified
+    emailReg: 0, // email already registered but not verified
     emailRegVer: 1, // email registered and verified
     emailNew: 2 // new email, registered right now
   };
@@ -150,25 +150,25 @@ router.post('/signup', function(req, res) {
   //DynamoDB parameters
   let params = {
     TableName,
-    Key: {
-      email,
-      name
+    KeyConditionExpression: 'email = :email',
+    ExpressionAttributeValues: {
+      ':email': email
     }
   };
 
   //make sure this account doesn't already exist
-  docClient.get(params, function(err, data) {
+  docClient.query(params, function(err, data) {
     if (err) res.status(500).json({ code: 500, msg: 'Internal server error!' });
-    else if (data.Item !== undefined) {
+    else if (data.Items[0] !== undefined) {
       // user is registered and verified
-      if (data.Item.isVerified)
-        res.status(400).json({
+      if (data.Items[0].isVerified)
+        res.status(200).json({
           code: responseCodes.emailRegVer,
           msg: 'User is already registered and verified!'
         });
       else {
         // user is registered but his account was not verified
-        res.status(400).json({
+        res.status(200).json({
           code: responseCodes.emailReg,
           msg: 'User is registered but not verified!'
         });

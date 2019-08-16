@@ -74,7 +74,7 @@ const accountVerificationEmailTemplate = (token, firstName) => {
             <a
               class="verify-button"
               href="http://localhost:3000/api/auth/verifyEmail?token=${token}"
-              >👉 Confirm Email Address
+              >Confirm Email Address
             </a>
           </div>
 
